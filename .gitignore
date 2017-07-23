@@ -1,0 +1,7 @@
+.DS_Store
+Thumbs.db
+/.idea
+/vendor
+composer.lock
+index.php
+mycache.cache

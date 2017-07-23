@@ -3,7 +3,7 @@
     "description": "Provides quran.com api in simple way",
     "type": "library",
     "keywords": ["quran.com", "quran api", "quran"],
-    "homepage": "http://theahmadzai.github.io/quran/",
+    "homepage": "https://quran.api-docs.io/v3/",
     "license": "MIT",
     "authors": [{
         "name": "Javed Ahmadzai",

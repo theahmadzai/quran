@@ -1,6 +1,6 @@
 {
     "name": "quran/quran",
-    "description": "Provides quran api in simple way",
+    "description": "Provides quran.com api in simple way",
     "type": "library",
     "keywords": ["quran.com", "quran api", "quran"],
     "homepage": "http://theahmadzai.github.io/quran/",

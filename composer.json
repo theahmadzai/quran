@@ -1,5 +1,5 @@
 {
-    "name": "theahmadzai/quran",
+    "name": "quran/quran",
     "description": "Provides quran api in simple way",
     "type": "library",
     "keywords": ["quran.com", "quran api", "quran"],

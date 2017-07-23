@@ -18,10 +18,6 @@ class Quran implements QuranInterface
 
     private $cacheData;
 
-    private $chapter;
-
-    private $verse;
-
     private $recitations;
 
     private $translations;
@@ -29,6 +25,10 @@ class Quran implements QuranInterface
     private $languages;
 
     private $tafsirs;
+
+    private $chapter;
+
+    private $verse;
 
     public function __construct($settings)
     {

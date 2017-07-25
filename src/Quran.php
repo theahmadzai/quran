@@ -12,6 +12,8 @@ class Quran implements QuranInterface
 {
     private $request;
 
+    private $chapter;
+
     private $language;
 
     private $cache;
@@ -26,33 +28,30 @@ class Quran implements QuranInterface
 
     private $tafsirs;
 
-    private $chapter;
+    private $data;
 
-    private $verse;
-
-    public function __construct($settings)
+    public function __construct(array $settings = [])
     {
-        if (is_array($settings)) {
-            if (isset($settings['language']) && strlen($settings['language']) === 2) {
-                $this->language = $settings['language'];
-            } else {
-                $this->language = self::DEFAULT_LANGUAGE;
-            }
+        $this->language = self::DEFAULT_LANGUAGE;
 
-            if (isset($settings['cache'])) {
-                if (file_exists($settings['cache'])) {
-                    if (filesize($settings['cache']) === 0) {
-                        file_put_contents($settings['cache'], '<?php return array();');
-                    }
-                    $this->cache     = $settings['cache'];
-                    $this->cacheData = require $settings['cache'];
-                } else {
-                    throw new \RuntimeException(sprintf('Invalid cache file.'));
-                }
-            }
+        if (isset($settings['language']) && strlen($settings['language']) === 2) {
+            $this->language = $settings['language'];
         }
 
-        $this->request = new Request(new Url("http://staging.quran.com:3000/api/v3/?language={$this->language}"));
+        if (isset($settings['cache'])) {
+            if (!file_exists($settings['cache']) || !fopen($settings['cache'], 'w')) {
+                throw new \RuntimeException(sprintf('Invalid cache file.'));
+            }
+            if (filesize($settings['cache']) === 0) {
+                file_put_contents($settings['cache'], '<?php return array();');
+            }
+            $this->cache     = $settings['cache'];
+            $this->cacheData = require $settings['cache'];
+        }
+
+        $this->request = new Request(new Url(self::DEFAULT_URL));
+
+        $this->chapter = new Chapter($this->request);
     }
 
     public function __call($name, $args)
@@ -62,60 +61,73 @@ class Quran implements QuranInterface
             return $this->options($name);
         }
 
-        $this->chapter->$name();
+        if (method_exists(Chapter::class, $name)) {
 
-        return $this->chapter;
+            $data = $this->chapter->$name(...$args);
+
+            // if (!$data instanceof Chapter) {
+
+            //     return $data;
+            // }
+
+            $this->data = $this->request->chapter($this->chapter->request());
+
+            return $this;
+        }
+
+        throw new \Exception(sprintf("Invalid function call '%s()'", $name));
     }
 
-    //----------------------------------------------------------------------------------
-    // API: /chapters
-    // API: /chapters/{id}
-    // API: /chapters/{id}/info
-    // API: /chapters/{id}/verses/
-    // API: /chapters/{id}/verses/{id}
-    // API: /chapters/{id}/verses/tafsirs
-    // API: /chapters/{id}/verses/{id}/tafsirs
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
+    // API: /chapters                          = chapter()->about();
+    // API: /chapters/{id}                     = chapter(id)->about();
+    // API: /chapters/{id}/info                = chapter(id)->info();
+    // API: /chapters/{id}/verses/             = chapter(id)->verse([args]);
+    // API: /chapters/{id}/verses/{id}         = chapter(id)->verse([args]);
+    // API: /chapters/{id}/verses/{id}/tafsirs = chapter(id)->verse([args])->tafsir([args]);
+    //--------------------------------------------------------------------------------------
 
-    public function chapter(int $chapter = 0)
+    public function chapter($chapter_number = null, array $options = [])
     {
-        $this->chapter = new Chapter($this->request, $chapter);
+        return $this->chapter->chapter($chapter_number, $options);
 
         return $this;
     }
 
-    public function get($handler)
-    {
-        $handler($this->chapter->data());
-    }
-
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
     // API: /search?q=string&size=20&page=0
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
 
-    public function search(string $query = '', int $size = 20, int $page = 0)
+    public function search($options = [])
     {
-        return $this->request->search($query, $size, $page);
+        $query = isset($options['query']) ? $options['query'] : null;
+        $size  = isset($options['size']) ? $options['size'] : 20;
+        $page  = isset($options['page']) ? $options['page'] : 0;
+
+        return $this->request->search((string) $query, (int) $size, (int) $page);
     }
 
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
     // API: /options/option[recitations,translations,languages,tafsirs]
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
 
-    public function options($option)
+    private function options(string $option)
     {
         if ($this->{$option} === null) {
 
             if (isset($this->cache)) {
+
                 if (isset($this->cacheData[$option])) {
 
-                    return $this->cacheData[$option];
+                    $this->{$option} = $this->cacheData[$option];
+
+                    return $this->{$option};
                 }
             }
-
-            $this->{$option} = $this->request->options($option);
+            $this->{$option} = $this->request->options($option)[$option];
 
             if (isset($this->cache)) {
+
                 $this->cacheData[$option] = $this->{$option};
 
                 file_put_contents(
@@ -128,9 +140,9 @@ class Quran implements QuranInterface
         return $this->{$option};
     }
 
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
     // Setting options
-    //----------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
 
     public function language($language = self::DEFAULT_LANGUAGE)
     {

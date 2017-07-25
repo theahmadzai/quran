@@ -77,6 +77,16 @@ class Request implements RequestInterface
         return $this->send("chapters/{$chapter}/{$info}");
     }
 
+    public function about($chapter_number = null)
+    {
+        return $this->send("chapters/{$chapter_number}");
+    }
+
+    public function info($chapter_number = null)
+    {
+        return $this->send("chapters/{$chapter_number}/info");
+    }
+
     public function search(string $query = null, int $size = 20, int $page = 0)
     {
         return $this->send('search', "q=$query&size=$size&page=$page");
@@ -86,4 +96,5 @@ class Request implements RequestInterface
     {
         return $this->send("options/{$option}");
     }
+
 }

@@ -3,77 +3,77 @@
 namespace Quran;
 
 use Quran\Http\Request;
+use Quran\Interfaces\ChapterInterface;
 
-class Chapter
+class Chapter implements ChapterInterface
 {
-    const TOTAL_CHAPTERS = 114;
-
     private $request;
 
-    private $chapter;
+    private $chapter_number;
 
-    protected $data;
+    private $data;
 
-    public function __construct(Request $request, int $chapter = 0)
+    public function __construct(Request $request)
     {
-        if ($chapter < 0 || $chapter > self::TOTAL_CHAPTERS) {
+        $this->request = $request;
+    }
+
+    public function chapter(int $chapter_number = null)
+    {
+        if ($chapter_number < 0 || $chapter_number > self::TOTAL_CHAPTERS) {
             throw new \InvalidArgumentException(sprintf("Excepted chapter number between 1 and 114."));
         }
+        if ($chapter_number === 0) {
+            $this->chapter_number = null;
+        } else {
+            $this->chapter_number = $chapter_number;
+        }
 
-        $this->request = $request;
-        $this->chapter = $chapter;
+        return $this;
+    }
 
-        $this->data = $request->chapter($chapter);
+    public function about()
+    {
+        return $this->request->about($this->chapter_number);
     }
 
     public function info()
     {
-        if ($this->chapter === 0) {
-            return false;
+        if ($this->chapter_number === null) {
+            throw new \InvalidArgumentException(sprintf("Please specify chapter number"));
         }
-        echo 'info';
-        // return $this->request->chapter($this->chapter, 'info');
+
+        return $this->request->info($this->chapter_number);
     }
-    public function abc()
+
+    public function verse(array $args = [])
     {
-        echo 'abc';
+        echo 'hi verse<br>';
+
+        // return $this;
     }
 
-    // public function __call(string $name = null, array $args = [])
-    // {
-    //     if ($name === 'info') {
-    //         $this->data = $this->request->chapter($this->chapter, $name);
-
-    //         return $this->data;
-    //     } else {
-    //         $this->data = $this->request->chapter($this->chapter);
-    //     }
-
-    //     $chapter = $this->data;
-
-    //     if ($name === 'with') {
-    //         pr($args);
-    //         // if (property_exists($chapter, 'chapters')) {
-    //         //     $response = [];
-    //         //     foreach ($chapter->chapters as $key => $value) {
-    //         //         $response[] = $value->$name;
-    //         //     }
-
-    //         //     return $response;
-    //         // }
-
-    //         // return $chapter->chapter->{$name};
-    //     }
-
-    public function data()
+    public function with(array $args = [])
     {
-        return $this->data;
+        echo 'hi with<br>';
+
+        // return $this;
     }
 
-    // public function __destruct()
-    // {
-    //     echo 'hi';
+    public function media(array $args = [])
+    {
+        echo 'hi media<br>';
 
-    //     return [false, $this->data];
-    // }
+        // return $this;
+    }
+
+    public function tafsir(array $args = [])
+    {
+        echo 'hi tafsir<br>';
+    }
+
+    public function request()
+    {
+        echo 'Request';
+    }
 }

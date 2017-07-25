@@ -4,4 +4,4 @@ Thumbs.db
 /vendor
 composer.lock
 index.php
-mycache.cache
+cache.cache

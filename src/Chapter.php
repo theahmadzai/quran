@@ -7,73 +7,117 @@ use Quran\Interfaces\ChapterInterface;
 
 class Chapter implements ChapterInterface
 {
+    /**
+     * Instance of Request class
+     * @var object
+     */
     private $request;
 
-    private $chapter_number;
+    /**
+     * Chapter number
+     * @var int
+     */
+    private $chapter;
 
-    private $data;
+    /**
+     * Verse number
+     * @var int
+     */
+    private $verse;
 
+    /**
+     * Url query string vars
+     * @var array
+     */
+    private $options = [];
+
+    /**
+     * Chapter class constructor
+     * @param Request $request - Inject instance of Request class to be able to
+     * send requests to the API.
+     */
     public function __construct(Request $request)
     {
         $this->request = $request;
     }
 
-    public function chapter(int $chapter_number = null)
-    {
-        if ($chapter_number < 0 || $chapter_number > self::TOTAL_CHAPTERS) {
-            throw new \InvalidArgumentException(sprintf("Excepted chapter number between 1 and 114."));
-        }
-        if ($chapter_number === 0) {
-            $this->chapter_number = null;
-        } else {
-            $this->chapter_number = $chapter_number;
-        }
+    //--------------------------------------------------------------------------------------
+    // API: /chapters                          = chapter();
+    // API: /chapters/{id}                     = chapter(id);
+    // API: /chapters/{id}/info                = chapter(id, 'info');
+    //--------------------------------------------------------------------------------------
 
-        return $this;
-    }
-
-    public function about()
+    public function chapter(int $chapter = null, $options = [])
     {
-        return $this->request->about($this->chapter_number);
-    }
-
-    public function info()
-    {
-        if ($this->chapter_number === null) {
-            throw new \InvalidArgumentException(sprintf("Please specify chapter number"));
+        if ($chapter < 0 || $chapter > self::TOTAL_CHAPTERS) {
+            throw new \InvalidArgumentException(
+                sprintf("Excepted chapter between 1 - 114.")
+            );
         }
 
-        return $this->request->info($this->chapter_number);
+        $this->chapter = ($chapter !== null) ? $chapter : null;
+
+        if (!empty($options)) {
+            if (is_string($options) && $options === 'info') {
+                if ($chapter === null) {
+                    throw new \InvalidArgumentException(
+                        sprintf("Please specify chapter number")
+                    );
+                }
+
+                return $this->request->send("chapters/{$this->chapter}/info");
+
+            } elseif ((is_int($options) > 0) && $options <= self::MAX_VERSES) {
+                $this->verse = $options;
+            } else {
+                $this->options = $options;
+            }
+
+            return $this;
+        }
+
+        return $this->request->send("chapters/{$this->chapter}");
+
     }
 
-    public function verse(array $args = [])
-    {
-        echo 'hi verse<br>';
+    //--------------------------------------------------------------------------------------
+    // API: /chapters/{id}/verses/             = chapter(id, [args])->verse([args]);
+    //--------------------------------------------------------------------------------------
 
-        // return $this;
+    public function verse(array $options = [], callable $callback = null)
+    {
+        $array = array_merge($this->options, $options);
+
+        $query = implode('&', array_map(function ($k, $v) {
+
+            return sprintf("%s=%s", $k, $v);
+        },
+            array_keys($array),
+            $array
+        ));
+
+        $data = $this->request->send(
+            "chapters/{$this->chapter}/verses",
+            $query
+        );
+
+        if (is_callable($callback)) {
+
+            return $callback($data);
+        }
+
+        return $data;
     }
 
-    public function with(array $args = [])
+    //--------------------------------------------------------------------------------------
+    // API: /chapters/{id}/verses/{id}/tafsirs = chapter(id, [args])->tafsir([args]);
+    //--------------------------------------------------------------------------------------
+
+    public function tafsir(int $tafsir = null, callable $callback = null)
     {
-        echo 'hi with<br>';
-
-        // return $this;
-    }
-
-    public function media(array $args = [])
-    {
-        echo 'hi media<br>';
-
-        // return $this;
-    }
-
-    public function tafsir(array $args = [])
-    {
-        echo 'hi tafsir<br>';
-    }
-
-    public function request()
-    {
-        echo 'Request';
+        return $this->request->send(
+            "chapters/{$this->chapter}/verses/{$this->verse}/tafsirs",
+            "tafsirs={$tafsir}"
+        );
     }
 }

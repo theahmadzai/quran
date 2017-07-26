@@ -10,26 +10,65 @@ use Quran\Interfaces\QuranInterface;
 
 class Quran implements QuranInterface
 {
+    /**
+     * Instanec of Request class
+     * @var object
+     */
     private $request;
 
+    /**
+     * Instance of Chapter class
+     * @var object
+     */
     private $chapter;
 
+    /**
+     * [$language description]
+     * @var string
+     */
     private $language;
 
+    /**
+     * [$cache description]
+     * @var string
+     */
     private $cache;
 
+    /**
+     * Cache data
+     * @var array
+     */
     private $cacheData;
 
-    private $recitations;
+    /**
+     * List of recitations fetched
+     * @var array
+     */
+    private $recitations = [];
 
-    private $translations;
+    /**
+     * List of translations fetched
+     * @var array
+     */
+    private $translations = [];
 
-    private $languages;
+    /**
+     * List of languages fetched
+     * @var array
+     */
+    private $languages = [];
 
-    private $tafsirs;
+    /**
+     * List of tafsirs fetched
+     * @var array
+     */
+    private $tafsirs = [];
 
-    private $data;
-
+    /**
+     * Quran class constructor
+     * @param array $settings - Array of user defined settings that is merged
+     * with default settings.
+     */
     public function __construct(array $settings = [])
     {
         $this->language = self::DEFAULT_LANGUAGE;
@@ -65,33 +104,15 @@ class Quran implements QuranInterface
 
             $data = $this->chapter->$name(...$args);
 
-            // if (!$data instanceof Chapter) {
+            if (!$data instanceof Chapter) {
 
-            //     return $data;
-            // }
+                return $data;
+            }
 
-            $this->data = $this->request->chapter($this->chapter->request());
-
-            return $this;
+            return $this->chapter;
         }
 
         throw new \Exception(sprintf("Invalid function call '%s()'", $name));
-    }
-
-    //--------------------------------------------------------------------------------------
-    // API: /chapters                          = chapter()->about();
-    // API: /chapters/{id}                     = chapter(id)->about();
-    // API: /chapters/{id}/info                = chapter(id)->info();
-    // API: /chapters/{id}/verses/             = chapter(id)->verse([args]);
-    // API: /chapters/{id}/verses/{id}         = chapter(id)->verse([args]);
-    // API: /chapters/{id}/verses/{id}/tafsirs = chapter(id)->verse([args])->tafsir([args]);
-    //--------------------------------------------------------------------------------------
-
-    public function chapter($chapter_number = null, array $options = [])
-    {
-        return $this->chapter->chapter($chapter_number, $options);
-
-        return $this;
     }
 
     //--------------------------------------------------------------------------------------
@@ -104,7 +125,7 @@ class Quran implements QuranInterface
         $size  = isset($options['size']) ? $options['size'] : 20;
         $page  = isset($options['page']) ? $options['page'] : 0;
 
-        return $this->request->search((string) $query, (int) $size, (int) $page);
+        return $this->request->send("search", "q={$query}&size={$size}&page={$page}");
     }
 
     //--------------------------------------------------------------------------------------
@@ -124,7 +145,7 @@ class Quran implements QuranInterface
                     return $this->{$option};
                 }
             }
-            $this->{$option} = $this->request->options($option)[$option];
+            $this->{$option} = $this->request->send("options/{$option}")[$option];
 
             if (isset($this->cache)) {
 

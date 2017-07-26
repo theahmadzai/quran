@@ -67,34 +67,4 @@ class Request implements RequestInterface
 
         return json_decode($response, JSON_OBJECT_AS_ARRAY);
     }
-
-    public function chapter($chapter, $info = null)
-    {
-        if ($chapter === 0) {
-            $chapter = null;
-        }
-
-        return $this->send("chapters/{$chapter}/{$info}");
-    }
-
-    public function about($chapter_number = null)
-    {
-        return $this->send("chapters/{$chapter_number}");
-    }
-
-    public function info($chapter_number = null)
-    {
-        return $this->send("chapters/{$chapter_number}/info");
-    }
-
-    public function search(string $query = null, int $size = 20, int $page = 0)
-    {
-        return $this->send('search', "q=$query&size=$size&page=$page");
-    }
-
-    public function options(string $option)
-    {
-        return $this->send("options/{$option}");
-    }
-
 }

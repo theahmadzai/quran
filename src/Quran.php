@@ -79,7 +79,9 @@ class Quran implements QuranInterface
 
         if (isset($settings['cache'])) {
             if (!file_exists($settings['cache']) || !fopen($settings['cache'], 'w')) {
-                throw new \RuntimeException(sprintf('Invalid cache file.'));
+                throw new \RuntimeException(
+                    sprintf('Invalid cache file.')
+                );
             }
             if (filesize($settings['cache']) === 0) {
                 file_put_contents($settings['cache'], '<?php return array();');
@@ -89,7 +91,6 @@ class Quran implements QuranInterface
         }
 
         $this->request = new Request(new Url(self::DEFAULT_URL));
-
         $this->chapter = new Chapter($this->request);
     }
 
@@ -112,7 +113,9 @@ class Quran implements QuranInterface
             return $this->chapter;
         }
 
-        throw new \Exception(sprintf("Invalid function call '%s()'", $name));
+        throw new \Exception(
+            sprintf("Invalid function call '%s()'", $name)
+        );
     }
 
     //--------------------------------------------------------------------------------------
@@ -125,7 +128,10 @@ class Quran implements QuranInterface
         $size  = isset($options['size']) ? $options['size'] : 20;
         $page  = isset($options['page']) ? $options['page'] : 0;
 
-        return $this->request->send("search", "q={$query}&size={$size}&page={$page}");
+        return $this->request->send(
+            "search",
+            "q={$query}&size={$size}&page={$page}"
+        );
     }
 
     //--------------------------------------------------------------------------------------

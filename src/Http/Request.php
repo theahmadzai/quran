@@ -29,12 +29,6 @@ class Request implements RequestInterface
 
     public function send(string $path, string $query = null)
     {
-        if ($query === null) {
-            $query = $this->query;
-        } else {
-            $query .= "&{$this->query}";
-        }
-
         $url = "{$this->url}/{$path}?{$query}";
 
         if (!filter_var($url, FILTER_VALIDATE_URL)) {

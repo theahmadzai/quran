@@ -116,7 +116,7 @@ class Quran implements QuranInterface
     // API: /path?query - custom query
     //--------------------------------------------------------------------------------------
 
-    public function get(string $path, string $query)
+    public function get(string $path = null, string $query = null)
     {
         $this->request->send($path, $query);
     }

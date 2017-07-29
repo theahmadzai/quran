@@ -99,7 +99,7 @@ class Chapter implements ChapterInterface
 
             if (isset($this->cache)) {
                 if ($this->chapter === null) {
-                    $data = array_combine(range(1, count($data), array_values($data)));
+                    $data = array_combine(range(1, count($data)), array_values($data));
                 }
                 file_put_contents(
                     $file,
@@ -185,6 +185,72 @@ class Chapter implements ChapterInterface
         if (isset($options['tafsirs'])) {
             unset($options['tafsirs']);
         }
+        if (isset($options['offset'])) {
+            $options['offset'] - 1;
+        }
+        if (isset($options['limit'])) {
+            $options['limit'];
+        }
+
+        if (isset($this->cache)) {
+            $file = "{$this->cache}/chapter{$this->chapter}.cache";
+
+            if (!file_exists($file) && !fopen($file, 'w')) {
+                throw new \RuntimeException(
+                    sprintf('Invalid cache file.')
+                );
+            }
+
+            if (!isset($options['offset'])) {
+                $page   = (isset($options['page'])) ? $options['page'] * 10 : 1;
+                $offset = (isset($options['offset'])) ? $options['offset'] + ($page - 10) : ($page - 10);
+            } else {
+                if (isset($options['page'])) {
+                    $page   = $options['page'] * 10;
+                    $offset = $options['offset'] + ($page - 10);
+                } else {
+                    $offset = $options['offset'];
+                }
+
+            }
+            if (!isset($options['limit'])) {
+                $limit = 10;
+            } else {
+                $limit = $options['limit'];
+            }
+
+            echo $offset, '-', $limit, '<hr>';
+
+            $start = $offset;
+            $end   = ($offset + ($limit - 1));
+            echo $start, '-', $end, '<hr>';
+            if (filesize($file) !== 0) {
+                $data = require $file;
+
+                $cached = array_filter($data, function ($key) use ($data, &$offset, &$limit, $start, $end) {
+                    if ($key >= $start && $key <= $end) {
+                        $offset = $key;
+                        $limit--;
+                        echo 'Fetching - ', $offset, '<br>';
+                        if (isset($data[$key])) {
+                            return $data[$key];
+                        }
+
+                    }
+                }, ARRAY_FILTER_USE_KEY);
+            }
+            if ($limit === 0 || (isset($cached) && count($cached) === self::CHAPTERS[$this->chapter])) {
+                $data = $cached;
+                goto FINISH;
+            }
+            $options['offset'] = $offset - 1;
+            if ($limit === 1) {
+                $options['limit'] = $limit + 1;
+            } else {
+                $limit = $options['limit'];
+            }
+            echo '<br>', $offset, '<br>', $limit;
+        }
 
         $translations = $options['translations'];
         if (is_array($translations)) {
@@ -197,15 +263,42 @@ class Chapter implements ChapterInterface
             $http_query = http_build_query($options);
         }
 
-        $data = $this->request->send(
+        $query = $this->request->send(
             "chapters/{$this->chapter}/verses",
             $http_query
         );
 
+        if (empty($query['verses'])) {
+            return $query['verses'];
+        }
+
+        $start = $query['verses'][0]['verse_number'];
+        $query = array_combine(range($start, $start + (count($query['verses'])) - 1),
+            array_values($query['verses']));
+
+        if (isset($data)) {
+            $data = array_replace($data, $query);
+        } else {
+            $data = $query;
+        }
+
+        if (isset($this->cache)) {
+            file_put_contents(
+                $file,
+                '<?php return ' . var_export($data, true) . ';'
+            );
+        }
+        if (!empty($cached)) {
+            $data = array_replace($cached, $query);
+        } else {
+            $data = $query;
+        }
+
+        FINISH:
         if (!empty($tokens)) {
             $collection = [];
 
-            foreach ($data['verses'] as $verse_key => $verse) {
+            foreach ($data as $verse_key => $verse) {
                 foreach ($tokens as $key => $value) {
                     if (isset($verse[$key]['0'])) {
                         if (is_array($value)) {

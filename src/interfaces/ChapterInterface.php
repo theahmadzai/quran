@@ -10,15 +10,8 @@ interface ChapterInterface
     const TOTAL_CHAPTERS = 114;
 
     /**
-     * Max number of verses of the longest chapter
+     * Verses count per chapter
      */
-    const MAX_VERSES = 255;
-
-    /**
-     * Total number of verses in the Quran
-     */
-    const TOTAL_VERSES = 6236;
-
     const CHAPTERS = [
         1   => 7,
         2   => 286,
@@ -136,10 +129,6 @@ interface ChapterInterface
         114 => 6,
     ];
 
-    /**
-     * Returns chapter
-     * @return [array] return an array of chapter, according to the parameters provided
-     */
     public function chapter();
 
     public function verse();

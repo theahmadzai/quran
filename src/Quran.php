@@ -61,7 +61,6 @@ class Quran implements QuranInterface
     {
         if (isset($settings['cache'])) {
             $cache = $settings['cache'];
-            unset($settings['cache']);
 
             if (!is_dir($cache) && !mkdir($cache)) {
                 throw new \RuntimeException(

@@ -35,20 +35,27 @@ class Chapter implements ChapterInterface
      * Chapter class constructor
      * @param Request $request - Inject instance of Request class to be able to
      * send requests to the API.
+     * @param array   $options - An array of options which is going to be converted
+     * to Url query params.
      */
     public function __construct(Request $request, array $options = [])
     {
         $this->request = $request;
+
+        if (isset($options['cache'])) {
+            $this->cache = $options['cache'];
+            unset($options['cache']);
+        }
         $this->options = $options;
     }
 
     //--------------------------------------------------------------------------------------
-    // API: /chapters                          = chapter();
-    // API: /chapters/{id}                     = chapter(id);
+    // API: /chapters                          = chapter('about');
+    // API: /chapters/{id}                     = chapter(id, 'about');
     // API: /chapters/{id}/info                = chapter(id, 'info');
     //--------------------------------------------------------------------------------------
 
-    public function chapter(int $chapter = null, $options = [])
+    public function chapter($chapter = null, $options = [])
     {
         if ((int) $chapter < 0 || (int) $chapter > self::TOTAL_CHAPTERS) {
             throw new \InvalidArgumentException(
@@ -56,18 +63,55 @@ class Chapter implements ChapterInterface
             );
         }
 
-        $this->chapter = ($chapter !== null) ? $chapter : null;
+        $this->chapter = ($chapter !== null && !is_string($chapter) && $chapter !== 0) ? $chapter : null;
 
         if (is_string($chapter) && $chapter === 'about' ||
             is_string($options) && $options === 'about') {
 
-            $data = $this->request->send("chapters/{$this->chapter}");
+            if (isset($this->cache)) {
+                $file = "{$this->cache}/about.cache";
 
-            if ($this->chapter === null) {
-                return $data['chapters'];
+                if (!file_exists($file) && !fopen($file, 'w')) {
+                    throw new \RuntimeException(
+                        sprintf('Invalid cache file.')
+                    );
+                }
+
+                if (filesize($file) !== 0) {
+                    $data = require $file;
+
+                    if ($this->chapter === null && count($data) === 114) {
+                        return array_values($data);
+                    }
+                    if (isset($data[$this->chapter])) {
+                        return $data[$this->chapter];
+                    }
+                }
             }
 
-            return $data['chapter'];
+            $query = $this->request->send("chapters/{$this->chapter}");
+
+            if ($this->chapter === null) {
+                $data = $query['chapters'];
+            } else {
+                $data[$this->chapter] = $query['chapter'];
+            }
+
+            if (isset($this->cache)) {
+                if ($this->chapter === null) {
+                    $data = array_combine(range(1, count($data), array_values($data)));
+                }
+                file_put_contents(
+                    $file,
+                    "<?php return " . var_export($data, true) . ';'
+                );
+            }
+
+            if ($this->chapter !== null) {
+                $data = $data[$this->chapter];
+            }
+
+            return $data;
         }
 
         if ($chapter === null) {
@@ -77,9 +121,37 @@ class Chapter implements ChapterInterface
         }
 
         if (is_string($options) && $options === 'info') {
-            $data = $this->request->send("chapters/{$this->chapter}/info");
 
-            return $data['chapter_info'];
+            if (isset($this->cache)) {
+                $file = "{$this->cache}/info.cache";
+
+                if (!file_exists($file) && !fopen($file, 'w')) {
+                    throw new \RuntimeException(
+                        sprintf('Invalid cache file.')
+                    );
+                }
+
+                if (filesize($file) !== 0) {
+                    $data = require $file;
+
+                    if (isset($data[$this->chapter])) {
+                        return $data[$this->chapter];
+                    }
+                }
+            }
+
+            $query = $this->request->send("chapters/{$this->chapter}/info");
+
+            $data[$this->chapter] = $query['chapter_info'];
+
+            if (isset($this->cache)) {
+                file_put_contents(
+                    $file,
+                    '<?php return ' . var_export($data, true) . ';'
+                );
+            }
+
+            return $data[$this->chapter];
 
         } elseif (is_int($options)) {
             $this->verse = $options;

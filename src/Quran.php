@@ -29,34 +29,28 @@ class Quran implements QuranInterface
     private $cache;
 
     /**
-     * Cache data
-     * @var array
-     */
-    private $cacheData = [];
-
-    /**
      * List of recitations fetched
      * @var array
      */
-    private $recitations = [];
+    private $recitations;
 
     /**
      * List of translations fetched
      * @var array
      */
-    private $translations = [];
+    private $translations;
 
     /**
      * List of languages fetched
      * @var array
      */
-    private $languages = [];
+    private $languages;
 
     /**
      * List of tafsirs fetched
      * @var array
      */
-    private $tafsirs = [];
+    private $tafsirs;
 
     /**
      * Quran class constructor
@@ -76,20 +70,20 @@ class Quran implements QuranInterface
             }
             $this->cache = $cache;
         }
-        // if (!file_exists($settings['cache']) || !fopen($settings['cache'], 'w')) {
-        //     throw new \RuntimeException(
-        //         sprintf('Invalid cache file.')
-        //     );
-        // }
-        // if (filesize($settings['cache']) === 0) {
-        //     file_put_contents($settings['cache'], '<?php return array();');
-        // }
-        // $this->cacheData = require $cache;
 
         $this->request = new Request(new Url(self::URL));
         $this->chapter = new Chapter($this->request, $settings);
     }
 
+    /**
+     * Gets calls to options i.e list of recitations, translations etc..
+     * and checks the method if it exists in the chapter class then returns
+     * the chapter class instance.
+     * @param  string $name - Name of the function
+     * @param  array  $args - Arguments of the function
+     * @return object/array - If not option, returns an array from chapter class,
+     * othewise object of chapter class.
+     */
     public function __call($name, $args)
     {
         if (in_array($name, self::OPTIONS)) {
@@ -97,7 +91,6 @@ class Quran implements QuranInterface
         }
 
         if (method_exists(Chapter::class, $name)) {
-
             $data = $this->chapter->$name(...$args);
 
             if (!$data instanceof Chapter) {
@@ -110,6 +103,45 @@ class Quran implements QuranInterface
         throw new \Exception(
             sprintf("Invalid function call '%s()'", $name)
         );
+    }
+
+    //--------------------------------------------------------------------------------------
+    // API: /options/option[recitations,translations,languages,tafsirs]
+    //--------------------------------------------------------------------------------------
+
+    private function options(string $option)
+    {
+        if ($this->{$option} === null) {
+
+            if (isset($this->cache)) {
+                $file = "{$this->cache}/{$option}.cache";
+
+                if (!file_exists($file) && !fopen($file, 'w')) {
+                    throw new \RuntimeException(
+                        sprintf('Invalid cache file.')
+                    );
+                }
+
+                if (filesize($file) !== 0) {
+                    $this->{$option} = require $file;
+
+                    if (isset($this->{$option}[$option])) {
+                        return $this->{$option}[$option];
+                    }
+                }
+            }
+
+            $this->{$option} = $this->request->send("options/{$option}");
+
+            if (isset($this->cache)) {
+                file_put_contents(
+                    $file,
+                    '<?php return ' . var_export($this->{$option}, true) . ';'
+                );
+            }
+        }
+
+        return $this->{$option}[$option];
     }
 
     //--------------------------------------------------------------------------------------
@@ -135,35 +167,5 @@ class Quran implements QuranInterface
             "search",
             "q={$query}&size={$size}&page={$page}"
         );
-    }
-
-    //--------------------------------------------------------------------------------------
-    // API: /options/option[recitations,translations,languages,tafsirs]
-    //--------------------------------------------------------------------------------------
-
-    private function options(string $option)
-    {
-        if ($this->{$option} === null) {
-            if (isset($this->cache)) {
-                if (isset($this->cacheData[$option])) {
-                    $this->{$option} = $this->cacheData[$option];
-
-                    return $this->{$option};
-                }
-            }
-
-            $this->{$option} = $this->request->send("options/{$option}")[$option];
-
-            if (isset($this->cache)) {
-                $this->cacheData[$option] = $this->{$option};
-
-                file_put_contents(
-                    $this->cache,
-                    '<?php return ' . var_export($this->cacheData, true) . ';'
-                );
-            }
-        }
-
-        return $this->{$option};
     }
 }

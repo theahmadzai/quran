@@ -18,4 +18,8 @@ interface QuranInterface
         'languages',
         'tafsirs',
     ];
+
+    public function get(string $path, string $query);
+
+    public function search(array $options);
 }

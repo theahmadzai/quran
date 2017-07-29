@@ -236,7 +236,7 @@ class Chapter implements ChapterInterface
             }
             if ($limit === 0 || (isset($cached) && count($cached) === self::CHAPTERS[$this->chapter])) {
                 $data = $cached;
-                goto FINISH;
+                goto DATA;
             }
             $options['offset'] = $offset - 1;
             if ($limit === 1) {
@@ -288,7 +288,7 @@ class Chapter implements ChapterInterface
             $data = $query;
         }
 
-        FINISH:
+        DATA:
         if (!empty($tokens)) {
             $collection = [];
 

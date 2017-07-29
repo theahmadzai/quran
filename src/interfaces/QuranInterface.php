@@ -19,7 +19,7 @@ interface QuranInterface
         'tafsirs',
     ];
 
-    public function get(string $path, string $query);
+    public function get(string $path, string $query = null);
 
-    public function search(array $options);
+    public function search(array $options = []);
 }

@@ -23,7 +23,7 @@ class Quran implements QuranInterface
     private $chapter;
 
     /**
-     * [$cache description]
+     * Cache directory/path
      * @var string
      */
     private $cache;
@@ -109,6 +109,13 @@ class Quran implements QuranInterface
     // API: /options/option[recitations,translations,languages,tafsirs]
     //--------------------------------------------------------------------------------------
 
+    /**
+     * Returns list of options i.e recitations, languages, list of tafsirs and translations
+     * If the cache is enable it puts the content in the cache after requesting from API
+     * OPTIONS - Recitations, Languages, Translations, Tafsirs
+     * @param  string $option - Name of the option
+     * @return array          - List of the option specified
+     */
     private function options(string $option)
     {
         if ($this->{$option} === null) {
@@ -148,15 +155,27 @@ class Quran implements QuranInterface
     // API: /path?query - custom query
     //--------------------------------------------------------------------------------------
 
-    public function get(string $path = null, string $query = null)
+    /**
+     * Crate custom query by specifing path and the http query
+     * @param  string      $path  - Path of the Url
+     * @param  string|null $query - Query of the Url
+     * @return array              - Returns an array of result
+     */
+    public function get(string $path, string $query = null)
     {
-        $this->request->send($path, $query);
+        return $this->request->send($path, $query);
     }
 
     //--------------------------------------------------------------------------------------
     // API: /search?q=string&size=20&page=0
     //--------------------------------------------------------------------------------------
 
+    /**
+     * Search a keyword in the quran, and returns the array of result
+     * Query options - query, size, page
+     * @param  array  $options - Array of specified options with keys
+     * @return array           - Returns an array of result
+     */
     public function search(array $options = [])
     {
         $query = isset($options['query']) ? $options['query'] : null;

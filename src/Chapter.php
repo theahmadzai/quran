@@ -219,11 +219,8 @@ class Chapter implements ChapterInterface
                 $limit = $options['limit'];
             }
 
-            echo $offset, '-', $limit, '<hr>';
-
             $start = $offset;
             $end   = ($offset + ($limit - 1));
-            echo $start, '-', $end, '<hr>';
             if (filesize($file) !== 0) {
                 $data = require $file;
 
@@ -231,11 +228,9 @@ class Chapter implements ChapterInterface
                     if ($key >= $start && $key <= $end) {
                         $offset = $key;
                         $limit--;
-                        echo 'Fetching - ', $offset, '<br>';
                         if (isset($data[$key])) {
                             return $data[$key];
                         }
-
                     }
                 }, ARRAY_FILTER_USE_KEY);
             }
@@ -249,7 +244,6 @@ class Chapter implements ChapterInterface
             } else {
                 $limit = $options['limit'];
             }
-            echo '<br>', $offset, '<br>', $limit;
         }
 
         $translations = $options['translations'];

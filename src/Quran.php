@@ -186,4 +186,82 @@ class Quran implements QuranInterface
             "q={$query}&size={$size}&page={$page}"
         );
     }
+
+    /**
+     * Returns information about cache
+     * filesize, total filezie, file names etc...
+     * @return string - Returns HTML string in a styled format.
+     */
+    public function cache(string $arg = null)
+    {
+        if ($arg === 'clear') {
+
+            $files = glob($this->cache . '/*.cache');
+
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+
+            return true;
+        }
+
+        $totalSize = 0;
+        $data      = "";
+        $data .= <<<EOT
+<pre>
+<table>
+    <tr>
+        <td style='background:#ccc;width:250px;'>
+            <b>File Name</b>
+        </td>
+        <td style='background:#ccc;width:250px;'>
+            <b>File Size</b>
+        </td>
+        <td style='background:#ccc;width:250px;'>
+            <b>Last Cached</b>
+        </td>
+        <td style='background:#ccc;width:250px;'>
+            <b>Last Fetched</b>
+        </td>
+    </tr>
+EOT;
+        foreach (new \DirectoryIterator($this->cache) as $file) {
+            if (!$file->isFile() || $file->isDot() || $file->getExtension() !== 'cache') {
+                continue;
+            }
+
+            $totalSize += $file->getSize();
+            $fileSize = round($file->getSize() / 1024, 2);
+            $MTime    = date("F j, Y, g:i:s a", $file->getMTime());
+            $ATime    = date("F j, Y, g:i:s a", $file->getATime());
+
+            $data .= <<<EOT
+<tr style='background:#efefef;'>
+    <td style='padding:10px;width:250px;'>{$file->getFilename()}</td>
+    <td style='padding:10px;width:250px;'>{$fileSize} KB</td>
+    <td style='padding:10px;width:250px;'>{$MTime}</td>
+    <td style='padding:10px;width:250px;'>{$ATime}</td>
+</tr>
+EOT;
+        }
+
+        $sizeInMb    = round($totalSize / pow(1024, 2), 2);
+        $sizeInKb    = round($totalSize / 1024, 2);
+        $memoryUsage = sprintf('%4.2f MB', memory_get_peak_usage(true) / 1048576);
+
+        $data .= <<<EOT
+</table>
+</pre>
+<pre style='font-size:16px;'><h3>Total cache size:</h3>
+    {$sizeInMb} MB<br>
+    {$sizeInKb} KB<br>
+    {$totalSize} Bytes<br>
+    <b>Memory:<b> {$memoryUsage}
+</pre>
+EOT;
+
+        return $data;
+    }
 }

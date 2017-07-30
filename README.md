@@ -190,5 +190,5 @@ cache must be enable.
 ```php
 echo $quran->cache();
 ```
-<p align="center"><img src="http://i.imgur.com/undefined.png" alt="Prints the cache"></p>
+<p align="center"><img src="http://i.imgur.com/nYqoPxr.png" alt="Prints the cache"></p>
 

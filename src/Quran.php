@@ -239,10 +239,18 @@ EOT;
 
             $data .= <<<EOT
 <tr style='background:#efefef;'>
-    <td style='padding:10px;width:250px;'>{$file->getFilename()}</td>
-    <td style='padding:10px;width:250px;'>{$fileSize} KB</td>
-    <td style='padding:10px;width:250px;'>{$MTime}</td>
-    <td style='padding:10px;width:250px;'>{$ATime}</td>
+    <td style='padding:10px;width:250px;'>
+        {$file->getFilename()}
+    </td>
+    <td style='padding:10px;width:250px;'>
+        {$fileSize} KB
+    </td>
+    <td style='padding:10px;width:250px;'>
+        {$MTime}
+    </td>
+    <td style='padding:10px;width:250px;'>
+        {$ATime}
+    </td>
 </tr>
 EOT;
         }
@@ -255,10 +263,10 @@ EOT;
 </table>
 </pre>
 <pre style='font-size:16px;'><h3>Total cache size:</h3>
-    {$sizeInMb} MB<br>
-    {$sizeInKb} KB<br>
-    {$totalSize} Bytes<br>
-    <b>Memory:<b> {$memoryUsage}
+        {$sizeInMb} MB<br>
+        {$sizeInKb} KB<br>
+        {$totalSize} Bytes<br>
+        <b>Memory:<b> {$memoryUsage}
 </pre>
 EOT;
 

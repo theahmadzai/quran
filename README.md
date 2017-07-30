@@ -1,6 +1,7 @@
+<p align="center"><img src="http://i.imgur.com/fWuCik5.png" alt="Quran.com API Helper"></p>
+
 Quran.com - API Helper
 ======================
-Simple API Helper package for Quran API, https://quran.api-docs.io/v3/
 
 [![Join the chat at https://gitter.im/Quran-API-Helper-PHP/Lobby](https://badges.gitter.im/Quran-API-Helper-PHP/Lobby.svg)](https://gitter.im/Quran-API-Helper-PHP/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/theahmadzai/quran.svg?branch=master)](https://travis-ci.org/theahmadzai/quran)
@@ -8,6 +9,8 @@ Simple API Helper package for Quran API, https://quran.api-docs.io/v3/
 [![Total Downloads](https://poser.pugx.org/quran/quran/downloads)](https://packagist.org/packages/quran/quran)
 [![Latest Unstable Version](https://poser.pugx.org/quran/quran/v/unstable)](https://packagist.org/packages/quran/quran)
 [![License](https://poser.pugx.org/quran/quran/license)](https://packagist.org/packages/quran/quran)
+
+Simple API Helper package for Quran API, https://quran.api-docs.io/v3/
 
 Quran API Helper is a library package for PHP developers, it fetches the requested data from Quran.com API and brings you it in an array, this package also includes a caching system it caches all the requested data and boosts the speed, decreases the deley time.
 
@@ -111,6 +114,16 @@ $quran->chapter(69)->verse([ // Fetches 11 - 20 verses of the chapter
 ]);
 
 // Advance usage
+
+$quran->chapter(69,[
+    // You don't need these to provide each time you can set
+    // them at once in top when instantiating the API Helper.
+    'language'     => 'en',          // language - default: en
+    'recitation'   => 1,             // recitation - default: 1
+    'translations' => [21, 54, 40],  // translations - default: 21
+    'text_type'    => 'image',       // text type - default: text
+])->verse();
+
 $verses = $quran->chapter(69)->verse(['page' => 1],[ // Gets what you want, just add the parameters
     'text_simple',
     'image'        => 'url',
@@ -131,4 +144,51 @@ Gets the tafsir of a verse of chapter, by default gets all the tafsir if you wan
 ```php
 $quran->chapter(114, 6)->tafsir(16);
 ```
+
+#### Advance Usage
+Example of a beautiful usage
+
+```php
+<?php
+
+require 'vendor/autoload.php';
+
+$quran = new \Quran\Quran([
+    'cache'        => __DIR__ . '/cache',
+    'language'     => 'en',
+    'recitation'   => 1,
+    'translations' => [21, 54, 40],
+    'tafsirs'      => [16, 17],
+    'text_type'    => 'image',
+]);
+
+$verses = $quran->chapter(1)->verse(['page' => 1], [
+    'image'        => 'url',
+    'audio'        => 'url',
+    'translations' => 'text',
+]);
+
+foreach ($verses as $verse) {
+    echo <<<EOT
+<center>
+<img src="{$verse['image_url']}">
+<h3>{$verse['translations_text']}</h3>
+<audio controls><source src="{$verse['audio_url']}" type="audio/mpeg"></audio>
+</center><hr>
+EOT;
+}
+```
+
+#### Result:
+
+<p align="center"><img src="http://i.imgur.com/qvK9X4m.png" alt="Result of the above code"></p>
+
+## Cache
+By calling cache method you see what files are cached, the date created and all the info.
+cache must be enable.
+
+```php
+echo $quran->cache();
+```
+<p align="center"><img src="http://i.imgur.com/undefined.png" alt="Prints the cache"></p>
 

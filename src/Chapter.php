@@ -208,6 +208,9 @@ class Chapter implements ChapterInterface
             if (!isset($options['offset'])) {
                 $page   = (isset($options['page'])) ? $options['page'] * 10 : 1;
                 $offset = (isset($options['offset'])) ? $options['offset'] + ($page - 10) : ($page - 10);
+                if ($offset === 0) {
+                    $offset = 1;
+                }
             } else {
                 if (isset($options['page'])) {
                     $page   = $options['page'] * 10;
@@ -246,7 +249,8 @@ class Chapter implements ChapterInterface
             if ($limit === 1) {
                 $options['limit'] = $limit + 1;
             } else {
-                $limit = $options['limit'];
+
+                // $limit = $options['limit'];
             }
         }
 

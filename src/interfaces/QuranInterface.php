@@ -22,4 +22,6 @@ interface QuranInterface
     public function get(string $path, string $query = null);
 
     public function search(array $options = []);
+
+    public function cache(string $arg = null);
 }

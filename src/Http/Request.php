@@ -6,16 +6,40 @@ use Quran\Http\Interfaces\RequestInterface;
 
 class Request implements RequestInterface
 {
+    /**
+     * HTTP Headers
+     * @var array
+     */
     private $haders = [];
 
+    /**
+     * HTTP Method
+     * @var string
+     */
     private $method;
 
+    /**
+     * HTTP Url
+     * @var string
+     */
     private $url;
 
+    /**
+     * HTTP Port
+     * @var string
+     */
     private $port;
 
+    /**
+     * HTTP Query params
+     * @var string
+     */
     private $query;
 
+    /**
+     * Request class - It takes a URL of the target API then sends requests to it.
+     * @param Url $url - An instance of URL class
+     */
     public function __construct(Url $url)
     {
         $this->headers = [
@@ -27,6 +51,13 @@ class Request implements RequestInterface
         $this->query  = $url->getQuery();
     }
 
+    /**
+     * Finilizes the request, sends the request after URL, query params and everything is
+     * provided and completed. It returns the response to the method that calls it.
+     * @param  string      $path  - Target Url path
+     * @param  string|null $query - Target Url query params
+     * @return array              - Returns an array of results
+     */
     public function send(string $path, string $query = null)
     {
         $url = "{$this->url}/{$path}?{$query}";

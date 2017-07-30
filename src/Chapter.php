@@ -142,16 +142,20 @@ class Chapter implements ChapterInterface
 
             $query = $this->request->send("chapters/{$this->chapter}/info");
 
-            $data[$this->chapter] = $query['chapter_info'];
+            if (!empty($query['chapter_info'])) {
+                $data[$this->chapter] = $query['chapter_info'];
 
-            if (isset($this->cache)) {
-                file_put_contents(
-                    $file,
-                    '<?php return ' . var_export($data, true) . ';'
-                );
+                if (isset($this->cache)) {
+                    file_put_contents(
+                        $file,
+                        '<?php return ' . var_export($data, true) . ';'
+                    );
+                }
+
+                return $data[$this->chapter];
             }
 
-            return $data[$this->chapter];
+            return $query;
 
         } elseif (is_int($options)) {
             $this->verse = $options;

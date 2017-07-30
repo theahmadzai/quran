@@ -137,7 +137,12 @@ class Quran implements QuranInterface
                 }
             }
 
-            $this->{$option} = $this->request->send("options/{$option}");
+            $query = $this->request->send("options/{$option}");
+
+            if (empty($query[$option])) {
+                return $query;
+            }
+            $this->{$option} = $query;
 
             if (isset($this->cache)) {
                 file_put_contents(
@@ -194,6 +199,11 @@ class Quran implements QuranInterface
      */
     public function cache(string $arg = null)
     {
+        if (!isset($this->cache)) {
+            throw new \RuntimeException(
+                sprintf("Please provide a cache path in settings.")
+            );
+        }
         if ($arg === 'clear') {
 
             $files = glob($this->cache . '/*.cache');
@@ -266,7 +276,7 @@ EOT;
         {$sizeInMb} MB<br>
         {$sizeInKb} KB<br>
         {$totalSize} Bytes<br>
-        <b>Memory:<b> {$memoryUsage}
+        <b>Memory usage:<b> {$memoryUsage}
 </pre>
 EOT;
 

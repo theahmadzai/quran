@@ -226,52 +226,48 @@ class Chapter implements ChapterInterface
                 $limit = $options['limit'];
             }
 
-            $start = $offset;
-            $end   = ($offset + ($limit - 1));
             if (filesize($file) !== 0) {
                 $data = require $file;
 
-                $cached = array_filter($data, function ($key) use ($data, &$offset, &$limit, $start, $end) {
-                    if ($key >= $start && $key <= $end) {
-                        $offset = $key;
+                $cached = array_filter($data, function ($key) use ($data, &$offset, &$limit) {
+                    if (isset($data[$key])) {
                         $limit--;
-                        if (isset($data[$key])) {
-                            return $data[$key];
-                        }
+                        $offset = $key + 1;
+
+                        return $data[$key];
                     }
                 }, ARRAY_FILTER_USE_KEY);
             }
+
             if ($limit === 0 || (isset($cached) && count($cached) === self::CHAPTERS[$this->chapter])) {
-                $data = $cached;
+                $data = array_values($cached);
                 goto DATA;
             }
+
             $options['offset'] = $offset - 1;
             if ($limit === 1) {
                 $options['limit'] = $limit + 1;
             }
         }
 
-        if (isset($options['translations'])) {
-            $translations = $options['translations'];
-        }
+        $http_query = http_build_query($options);
 
-        if (!empty($translations) && is_array($translations)) {
-            array_walk($translations, function ($key, $value, $default = 'translations') use (&$build_query) {
+        if (isset($options['translations']) && is_array($options['translations'])) {
+            array_walk($options['translations'], function ($key, $value, $default = 'translations') use (&$build_query) {
                 $build_query[] = http_build_query([$default => $key]);
             });
             unset($options['translations']);
-            $http_query = http_build_query($options) . '&' . implode('&', $build_query);
-        } else {
-            $http_query = http_build_query($options);
-        }
 
+            $http_query .= '&' . implode('&', $build_query);
+        }
+        echo $http_query;
         $query = $this->request->send(
             "chapters/{$this->chapter}/verses",
             $http_query
         );
 
         if (empty($query['verses'])) {
-            return $query['verses'];
+            return $query;
         }
 
         $start = $query['verses'][0]['verse_number'];
@@ -291,9 +287,9 @@ class Chapter implements ChapterInterface
             );
         }
         if (!empty($cached)) {
-            $data = array_replace($cached, $query);
+            $data = array_values(array_replace($cached, $query));
         } else {
-            $data = $query;
+            $data = array_values($query);
         }
 
         DATA:

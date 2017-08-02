@@ -248,14 +248,14 @@ class Chapter implements ChapterInterface
             $options['offset'] = $offset - 1;
             if ($limit === 1) {
                 $options['limit'] = $limit + 1;
-            } else {
-
-                // $limit = $options['limit'];
             }
         }
 
-        $translations = $options['translations'];
-        if (is_array($translations)) {
+        if (isset($options['translations'])) {
+            $translations = $options['translations'];
+        }
+
+        if (!empty($translations) && is_array($translations)) {
             array_walk($translations, function ($key, $value, $default = 'translations') use (&$build_query) {
                 $build_query[] = http_build_query([$default => $key]);
             });

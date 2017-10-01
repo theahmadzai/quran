@@ -2,6 +2,8 @@
 Thumbs.db
 /.idea
 /vendor
-composer.lock
-index.php
+/node_modules
 /cache
+composer.lock
+package-lock.json
+index.php

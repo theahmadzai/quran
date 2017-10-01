@@ -19,5 +19,3 @@ It's recommended that you use Composer to install it.
 ```sh
 composer require quran/quran
 ```
-
-V2 DOCS: info to be added.

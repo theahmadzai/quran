@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Coding Standard">
+    <description>PSR2 Coding Standard</description>
+    <arg value="p"/>
+    <arg name="colors"/>
+    <rule ref="PSR2"/>
+    <file>src/</file>
+</ruleset>

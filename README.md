@@ -10,6 +10,8 @@ Quran.com - API Helper
 [![Latest Unstable Version](https://poser.pugx.org/quran/quran/v/unstable)](https://packagist.org/packages/quran/quran)
 [![License](https://poser.pugx.org/quran/quran/license)](https://packagist.org/packages/quran/quran)
 
+## V2 DOCS
+=======
 ### Requirements
 - PHP 5.6+
 - cUrl enabled

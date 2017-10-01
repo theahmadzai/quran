@@ -2,8 +2,15 @@
 
 namespace Quran\Fragments;
 
-class Options extends AbstractFragment
+use Quran\Base;
+
+class Options extends Base
 {
+    public function __construct(string $name, array $arguments = [])
+    {
+        $this->query[$name] = $arguments;
+    }
+
     public function cache()
     {
 

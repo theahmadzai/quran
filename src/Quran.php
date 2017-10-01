@@ -2,42 +2,58 @@
 
 namespace Quran;
 
-class Quran
-{
-    private static $factory;
-    private $fragments;
+use Exception;
+use ReflectionClass;
 
-    private static function fragmentsFactory()
+class Quran extends Base
+{
+    protected $fragments;
+
+    public static function settings(array $settings)
     {
-        if (!static::$factory instanceof Factory) {
-            static::$factory = new Factory();
+
+    }
+
+    public function get(array $arguments = [])
+    {
+        $total = [];
+        foreach ($this->fragments as $fragment) {
+            $total[] = $fragment->build();
         }
 
-        return static::$factory;
+        pr($this->fetchData($total));
+
+        return $this->data;
     }
 
     public static function __callStatic(string $name, array $arguments)
     {
-        $quran = new static();
-
-        return $quran->__call($name, $arguments);
+        return (new static )->__call($name, $arguments);
     }
 
     public function __call(string $name, array $arguments)
     {
         try {
-            $fragment = static::fragmentsFactory()->create($name, $arguments);
+            $className = 'Quran\\Fragments\\' . ucfirst($name);
+
+            if (!class_exists($className)) {
+                throw new Exception(
+                    sprintf('"%s" is not a valid chain', $name)
+                );
+            }
+
+            $fragment = (new ReflectionClass($className))->newInstanceArgs([$name, $arguments]);
 
             $this->fragments[spl_object_hash($fragment)] = $fragment;
-        } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage(), $exception->getCode(), $exception);
+
+        } catch (Exception $exception) {
+            throw new Exception(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
 
         return $this;
-    }
-
-    public function get()
-    {
-        return $this->fragments;
     }
 }

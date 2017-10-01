@@ -1,6 +1,6 @@
 <p align="center"><img src="http://i.imgur.com/fWuCik5.png" alt="Quran.com API Helper"></p>
 
-Quran.com - API Helper
+Quran.com - API Helpera
 ======================
 
 [![Join the chat at https://gitter.im/Quran-API-Helper-PHP/Lobby](https://badges.gitter.im/Quran-API-Helper-PHP/Lobby.svg)](https://gitter.im/Quran-API-Helper-PHP/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

@@ -1,0 +1,15 @@
+{
+    "name": "immortal",
+    "version": "1.0.0",
+    "description": "Immortal development environemnt",
+    "author": "Javed Ahmadzai <theahmadzai@hotmail.com>",
+    "private": true,
+    "scripts": {
+        "dev": "gulp"
+    },
+    "devDependencies": {
+        "browser-sync": "^2.18.13",
+        "gulp": "^3.9.1",
+        "gulp-connect-php": "^1.0.1"
+    }
+}

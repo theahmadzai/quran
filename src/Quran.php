@@ -11,7 +11,6 @@ class Quran extends Base
 
     public static function settings(array $settings)
     {
-
     }
 
     public function get(array $arguments = [])
@@ -45,7 +44,6 @@ class Quran extends Base
             $fragment = (new ReflectionClass($className))->newInstanceArgs([$name, $arguments]);
 
             $this->fragments[spl_object_hash($fragment)] = $fragment;
-
         } catch (Exception $exception) {
             throw new Exception(
                 $exception->getMessage(),

@@ -19,3 +19,6 @@ It's recommended that you use Composer to install it.
 ```sh
 composer require quran/quran
 ```
+
+### This version is currently under development please use version 1.0.
+https://github.com/theahmadzai/quran/tree/1.0
